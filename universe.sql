@@ -26,7 +26,8 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.galaxy (
     galaxy_id integer NOT NULL,
-    name character varying(30) NOT NULL
+    name character varying(30) NOT NULL,
+    discovery_year integer
 );
 
 
@@ -60,7 +61,14 @@ ALTER SEQUENCE public.galaxy_galaxy_id_seq OWNED BY public.galaxy.galaxy_id;
 
 CREATE TABLE public.moon (
     moon_id integer NOT NULL,
-    name character varying(30) NOT NULL
+    name character varying(30) NOT NULL,
+    planet_id integer NOT NULL,
+    weight numeric,
+    landing_year integer,
+    landing_mission text,
+    is_visible boolean,
+    has_water boolean,
+    discovery_year integer
 );
 
 
@@ -94,7 +102,9 @@ ALTER SEQUENCE public.moon_moon_id_seq OWNED BY public.moon.moon_id;
 
 CREATE TABLE public.planet (
     planet_id integer NOT NULL,
-    name character varying(30) NOT NULL
+    name character varying(30) NOT NULL,
+    star_id integer NOT NULL,
+    discovery_year integer
 );
 
 
@@ -128,7 +138,9 @@ ALTER SEQUENCE public.planet_planet_id_seq OWNED BY public.planet.planet_id;
 
 CREATE TABLE public.star (
     star_id integer NOT NULL,
-    name character varying(30) NOT NULL
+    name character varying(30) NOT NULL,
+    galaxy_id integer NOT NULL,
+    discovery_year integer
 );
 
 
@@ -188,7 +200,13 @@ ALTER TABLE ONLY public.star ALTER COLUMN star_id SET DEFAULT nextval('public.st
 -- Data for Name: galaxy; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-COPY public.galaxy (galaxy_id, name) FROM stdin;
+COPY public.galaxy (galaxy_id, name, discovery_year) FROM stdin;
+1	Ghamida	1997
+2	Dhamida	1998
+3	Qhamida	1948
+4	Thamida	1944
+5	Lhamida	1942
+6	Nhamida	1940
 \.
 
 
@@ -196,7 +214,7 @@ COPY public.galaxy (galaxy_id, name) FROM stdin;
 -- Data for Name: moon; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-COPY public.moon (moon_id, name) FROM stdin;
+COPY public.moon (moon_id, name, planet_id, weight, landing_year, landing_mission, is_visible, has_water, discovery_year) FROM stdin;
 \.
 
 
@@ -204,7 +222,7 @@ COPY public.moon (moon_id, name) FROM stdin;
 -- Data for Name: planet; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-COPY public.planet (planet_id, name) FROM stdin;
+COPY public.planet (planet_id, name, star_id, discovery_year) FROM stdin;
 \.
 
 
@@ -212,7 +230,13 @@ COPY public.planet (planet_id, name) FROM stdin;
 -- Data for Name: star; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-COPY public.star (star_id, name) FROM stdin;
+COPY public.star (star_id, name, galaxy_id, discovery_year) FROM stdin;
+1	Harbatia	1	1910
+2	Zarbatia	1	1920
+3	Qarbatia	2	1940
+4	Tarbatia	1	1945
+6	Marbatia	4	1946
+7	Warbatia	1	1947
 \.
 
 
@@ -220,7 +244,7 @@ COPY public.star (star_id, name) FROM stdin;
 -- Name: galaxy_galaxy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.galaxy_galaxy_id_seq', 1, false);
+SELECT pg_catalog.setval('public.galaxy_galaxy_id_seq', 6, true);
 
 
 --
@@ -241,7 +265,15 @@ SELECT pg_catalog.setval('public.planet_planet_id_seq', 1, false);
 -- Name: star_star_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.star_star_id_seq', 1, false);
+SELECT pg_catalog.setval('public.star_star_id_seq', 7, true);
+
+
+--
+-- Name: galaxy galaxy_discovery_year_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.galaxy
+    ADD CONSTRAINT galaxy_discovery_year_key UNIQUE (discovery_year);
 
 
 --
@@ -253,11 +285,27 @@ ALTER TABLE ONLY public.galaxy
 
 
 --
+-- Name: moon moon_discovery_year_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.moon
+    ADD CONSTRAINT moon_discovery_year_key UNIQUE (discovery_year);
+
+
+--
 -- Name: moon moon_pkey; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
 --
 
 ALTER TABLE ONLY public.moon
     ADD CONSTRAINT moon_pkey PRIMARY KEY (moon_id);
+
+
+--
+-- Name: planet planet_discovery_year_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.planet
+    ADD CONSTRAINT planet_discovery_year_key UNIQUE (discovery_year);
 
 
 --
@@ -269,11 +317,43 @@ ALTER TABLE ONLY public.planet
 
 
 --
+-- Name: star star_discovery_year_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.star
+    ADD CONSTRAINT star_discovery_year_key UNIQUE (discovery_year);
+
+
+--
 -- Name: star star_pkey; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
 --
 
 ALTER TABLE ONLY public.star
     ADD CONSTRAINT star_pkey PRIMARY KEY (star_id);
+
+
+--
+-- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.moon
+    ADD CONSTRAINT moon_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES public.planet(planet_id);
+
+
+--
+-- Name: planet planet_star_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.planet
+    ADD CONSTRAINT planet_star_id_fkey FOREIGN KEY (star_id) REFERENCES public.star(star_id);
+
+
+--
+-- Name: star star_galaxy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.star
+    ADD CONSTRAINT star_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
 
 
 --
